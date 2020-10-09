@@ -94,6 +94,9 @@ RUN wget http://pear.php.net/go-pear.phar
 RUN php go-pear.phar
 RUN pear install http_request2
 
+# Install Vim
+RUN apt-get update && apt-get install -y vim
+
 # Enable mod_rewrite
 RUN a2enmod rewrite
 
@@ -104,9 +107,11 @@ ENV PHP_POST_MAX_SIZE 10M
 # Set PHP timezones and add pear library to path
 RUN sed -i "s/;date.timezone =/date.timezone = Europe\/Paris/g" /etc/php/5.6/apache2/php.ini && \
     sed -i "s/;date.timezone =/date.timezone = Europe\/Paris/g" /etc/php/5.6/cli/php.ini && \
-    sed -i "s/;include_path = \".:.*/include_path=\".:/usr/share/php:/usr/share/pear\"" /etc/php/5.6/apache2/php.ini && \
-    sed -i "s/;include_path = \".:.*/include_path=\".:/usr/share/php:/usr/share/pear\"" /etc/php/5.6/cli/php.ini 
- 
+    sed -i 's|;include_path=".:.*|include_path=".:/usr/share/php:/usr/share/pear"|' /etc/php/5.6/apache2/php.ini && \
+    sed -i 's|;include_path = ".:.*|include_path=".:/usr/share/php:/usr/share/pear"|' /etc/php/5.6/apache2/php.ini && \
+    sed -i 's|;include_path=".:.*|include_path=".:/usr/share/php:/usr/share/pear"|' /etc/php/5.6/cli/php.ini && \
+    sed -i 's|;include_path = ".:.*|include_path=".:/usr/share/php:/usr/share/pear"|' /etc/php/5.6/cli/php.ini 
+
 # Prepare /app folder with sample index.php
 RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 ADD app/ /app
