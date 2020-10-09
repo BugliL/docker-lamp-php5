@@ -92,6 +92,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 # Install pear
 RUN wget http://pear.php.net/go-pear.phar
 RUN php go-pear.phar
+RUN pear install http_request2
 
 # Enable mod_rewrite
 RUN a2enmod rewrite
