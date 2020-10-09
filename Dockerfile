@@ -1,7 +1,8 @@
 FROM phusion/baseimage:0.10.2
-MAINTAINER Jake Jarvis <jake@jarv.is>
-ENV REFRESHED_AT 2019-06-11
+MAINTAINER Lorenzo Bugli <bugli.lorenzo@gmail.com>
 
+# Based on jakejarvis/docker-lamp-php5
+# MAINTAINER Jake Jarvis <jake@jarv.is>
 # Based on mattrayner/lamp & dgraziotin/lamp:
 # MAINTAINER Matthew Rayner <hello@rayner.io>
 # MAINTAINER Daniel Graziotin <daniel@ineed.coffee>
@@ -88,17 +89,23 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     php -r "unlink('composer-setup.php');" && \
     mv composer.phar /usr/local/bin/composer
 
+# Install pear
+RUN wget http://pear.php.net/go-pear.phar
+RUN php go-pear.phar
+
 # Enable mod_rewrite
 RUN a2enmod rewrite
 
 # Some more environment variables for PHP
-ENV PHP_UPLOAD_MAX_FILESIZE 10M
+ENV PHP_UPLOAD_MAX_FILESIZE 100M
 ENV PHP_POST_MAX_SIZE 10M
 
-# Set PHP timezones to America/New_York
-RUN sed -i "s/;date.timezone =/date.timezone = America\/New_York/g" /etc/php/5.6/apache2/php.ini && \
-    sed -i "s/;date.timezone =/date.timezone = America\/New_York/g" /etc/php/5.6/cli/php.ini
-
+# Set PHP timezones and add pear library to path
+RUN sed -i "s/;date.timezone =/date.timezone = Europe\/Paris/g" /etc/php/5.6/apache2/php.ini && \
+    sed -i "s/;date.timezone =/date.timezone = Europe\/Paris/g" /etc/php/5.6/cli/php.ini && \
+    sed -i "s/;include_path = \".:.*/include_path=\".:/usr/share/php:/usr/share/pear\"" /etc/php/5.6/apache2/php.ini && \
+    sed -i "s/;include_path = \".:.*/include_path=\".:/usr/share/php:/usr/share/pear\"" /etc/php/5.6/cli/php.ini 
+ 
 # Prepare /app folder with sample index.php
 RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 ADD app/ /app
